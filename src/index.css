@@ -542,29 +542,33 @@ body {
 }
 
 /* ══════════════════════════════════════════
-   FILTER BAR — CHIP STYLE
+   FILTER BAR
 ══════════════════════════════════════════ */
-.filter-bar-chips {
+.filter-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 10px 16px;
+  padding: 8px 14px;
   margin-bottom: 16px;
   flex-wrap: wrap;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
-.fc-header {
+.filter-bar-left {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding-right: 10px;
+  border-right: 1px solid #e5e7eb;
   flex-shrink: 0;
 }
 
-.fc-title {
+.filter-bar-icon { display: flex; align-items: center; }
+
+.filter-bar-label {
   font-size: 11px;
   font-weight: 700;
   color: #1e3a8a;
@@ -572,7 +576,7 @@ body {
   letter-spacing: 0.08em;
 }
 
-.fc-badge {
+.filter-bar-badge {
   background: #1e3a8a;
   color: #fff;
   border-radius: 10px;
@@ -581,72 +585,46 @@ body {
   font-weight: 700;
 }
 
-.fc-divider {
-  width: 1px;
-  height: 28px;
-  background: #e5e7eb;
-  flex-shrink: 0;
-}
-
-.fc-body {
+.filter-bar-selects {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  flex: 1;
   align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
 }
 
-.fc-group {
+.fb-select-wrap {
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-.fc-group-label {
-  font-size: 10px;
-  font-weight: 700;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.fc-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.fc-chip {
-  padding: 4px 11px;
-  border-radius: 20px;
+  background: #f4f5fb;
   border: 1.5px solid #e5e7eb;
-  background: #f9fafb;
-  color: #4b5563;
-  font-size: 12px;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
+  border-radius: 8px;
+  padding: 5px 10px;
+  color: #6b7280;
   transition: all 0.15s;
-  white-space: nowrap;
-  line-height: 1.4;
+  cursor: pointer;
 }
 
-.fc-chip:hover {
-  border-color: #93c5fd;
+.fb-select-wrap.active {
   background: #eff6ff;
+  border-color: #93c5fd;
   color: #1e3a8a;
 }
 
-.fc-chip.active {
-  background: #1e3a8a;
-  border-color: #1e3a8a;
-  color: #ffffff;
-  font-weight: 600;
+.fb-select-wrap select {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding-right: 4px;
 }
 
-.fc-reset {
+.filter-bar-reset {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -663,7 +641,7 @@ body {
   flex-shrink: 0;
 }
 
-.fc-reset:hover {
+.filter-bar-reset:hover {
   background: #fee2e2;
   border-color: #f87171;
 }
