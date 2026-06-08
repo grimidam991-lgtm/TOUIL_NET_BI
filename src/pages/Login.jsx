@@ -1,10 +1,6 @@
 import { useState } from 'react';
 
-const USERS = [
-  { username: 'admin',   password: 'admin123',   role: 'Administrateur', initials: 'AD' },
-  { username: 'manager', password: 'manager123', role: 'Manager',        initials: 'MG' },
-  { username: 'viewer',  password: 'viewer123',  role: 'Viewer',         initials: 'VW' },
-];
+const ADMIN = { username: 'admin', password: 'admin123', role: 'Administrateur', initials: 'AD' };
 
 const STATS = [
   { icon: '📈', label: 'MRR',    value: '11 896 TND', color: '#60a5fa' },
@@ -24,12 +20,9 @@ export default function Login({ onLogin }) {
     e.preventDefault();
     setLoading(true);
     setTimeout(() => {
-      const match = USERS.find(
-        u => u.username === username.trim() && u.password === password
-      );
-      if (match) {
+      if (username.trim() === ADMIN.username && password === ADMIN.password) {
         setError('');
-        onLogin(match);
+        onLogin(ADMIN);
       } else {
         setError('Identifiants incorrects. Veuillez réessayer.');
       }
@@ -118,18 +111,16 @@ export default function Login({ onLogin }) {
 
           {/* Demo credentials */}
           <div className="login-demo">
-            <div className="login-demo-title">Comptes de démonstration</div>
+            <div className="login-demo-title">Compte de démonstration</div>
             <div className="login-demo-grid">
-              {USERS.map(u => (
-                <button key={u.username} className="login-demo-chip"
-                  onClick={() => { setUsername(u.username); setPassword(u.password); setError(''); }}>
-                  <span className="login-demo-avatar">{u.initials}</span>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: 11 }}>{u.username}</div>
-                    <div style={{ fontSize: 10, color: '#9ca3af' }}>{u.role}</div>
-                  </div>
-                </button>
-              ))}
+              <button className="login-demo-chip"
+                onClick={() => { setUsername(ADMIN.username); setPassword(ADMIN.password); setError(''); }}>
+                <span className="login-demo-avatar">{ADMIN.initials}</span>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 11 }}>{ADMIN.username}</div>
+                  <div style={{ fontSize: 10, color: '#9ca3af' }}>{ADMIN.role}</div>
+                </div>
+              </button>
             </div>
           </div>
         </div>
