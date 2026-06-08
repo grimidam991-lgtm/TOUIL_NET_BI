@@ -6,6 +6,7 @@ import {
 import KPICard from '../components/KPICard';
 import useApi from '../hooks/useApi';
 import FilterBar, { buildQS, defaultFilters } from '../components/FilterBar';
+import { niceMax } from '../utils/chart';
 
 function SectionHeader({ title }) {
   return (
@@ -28,9 +29,10 @@ export default function Tech() {
   const { data: sessionsNav }     = useApi(`/api/users/sessions-navigateur${qs}`,[]);
   const { data: sessionsPays }    = useApi(`/api/users/sessions-pays${qs}`,      []);
 
-  const paysMax  = sessionsPays.length  ? sessionsPays[0]?.nb || 1                        : 1;
-  const navMax   = sessionsNav.length   ? Math.max(...sessionsNav.map(r => r.nb))  * 1.3  : 200;
-  const pagesMax = topPages.length      ? Math.max(...topPages.map(r => r.nb))     * 1.3  : 200;
+  const paysMax    = sessionsPays.length  ? sessionsPays[0]?.nb || 1                          : 1;
+  const navMax     = sessionsNav.length   ? niceMax(Math.max(...sessionsNav.map(r => r.nb)))   : 200;
+  const pagesMax   = topPages.length      ? niceMax(Math.max(...topPages.map(r => r.nb)))      : 200;
+  const monthlyMax = sessionsMonthly.length ? niceMax(Math.max(...sessionsMonthly.map(r=>r.nb))): 50;
 
   return (
     <>
@@ -39,9 +41,7 @@ export default function Tech() {
           <div className="page-banner-title">TouilNet | Engagement Utilisateurs</div>
           <div className="page-banner-sub">Sessions · MAU · Bounce · OS · Navigateurs · Pages</div>
         </div>
-        <div className="page-banner-right">
-          Données en temps réel<br />Entrepôt PostgreSQL
-        </div>
+        <div className="page-banner-right">Données en temps réel<br />Entrepôt PostgreSQL</div>
       </div>
 
       <FilterBar filters={filters} onChange={setFilters} />
@@ -52,17 +52,14 @@ export default function Tech() {
           value={kpis.nb_sessions ? Number(kpis.nb_sessions).toLocaleString('fr-TN') : '—'}
           sub="Tous canaux" subColor="#9ca3af"
           iconBg="#dbeafe" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>} />
-
         <KPICard label="📊 MAU"
           value={kpis.mau || '—'}
           sub="Actifs ce mois" subColor="#9ca3af"
           iconBg="#d1fae5" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>} />
-
         <KPICard label="⚠️ BOUNCE %"
           value={kpis.bounce_pct ? `${kpis.bounce_pct}%` : '—'}
           sub="Faible (bon)" subColor="#059669"
           iconBg="#fef3c7" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>} />
-
         <KPICard label="⏱️ DURÉE MOYENNE"
           value={kpis.duree_moy_min ? `${kpis.duree_moy_min} min` : '—'}
           sub="En minutes" subColor="#9ca3af"
@@ -77,7 +74,8 @@ export default function Tech() {
             <LineChart data={sessionsMonthly} margin={{ top: 16, right: 20, left: 10, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="mois" tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false} interval={3} />
-              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} width={34} />
+              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
+                domain={[0, monthlyMax]} tickCount={5} allowDecimals={false} width={36} />
               <Tooltip formatter={(v) => [v, 'Sessions']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Line type="monotone" dataKey="nb" stroke="#1e3a8a" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
             </LineChart>
@@ -112,7 +110,7 @@ export default function Tech() {
             <BarChart data={topPages} layout="vertical" margin={{ top: 4, right: 44, left: 8, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" horizontal={false} />
               <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
-                domain={[0, pagesMax]} />
+                domain={[0, pagesMax]} tickCount={4} allowDecimals={false} />
               <YAxis dataKey="page" type="category" tick={{ fontSize: 10, fill: '#374151' }}
                 axisLine={false} tickLine={false} width={60} />
               <Tooltip formatter={(v) => [v, 'Sessions']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
@@ -129,7 +127,7 @@ export default function Tech() {
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="nav" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
-                domain={[0, navMax]} width={34} />
+                domain={[0, navMax]} tickCount={5} allowDecimals={false} width={36} />
               <Tooltip formatter={(v) => [v, 'Sessions']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="nb" fill="#1e3a8a" radius={[4, 4, 0, 0]}
                 label={{ position: 'top', fontSize: 10, fill: '#374151' }} />

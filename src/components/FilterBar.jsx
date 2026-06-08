@@ -7,9 +7,10 @@ const MOIS_FR = [
   { v: 10, l: 'Octobre' }, { v: 11, l: 'Novembre' },  { v: 12, l: 'Décembre' },
 ];
 
-const PLANS = ['Premium', 'Standard', 'Entreprise'];
-const CATS  = ['Bug', 'Fonctionnalité', 'Performance', 'Facturation', 'Sécurité', 'Autre'];
-const PRIOS = ['Critique', 'Haute', 'Moyenne', 'Basse'];
+const PLANS       = ['Premium', 'Standard', 'Entreprise'];
+const CATS        = ['Bug', 'Fonctionnalité', 'Performance', 'Facturation', 'Sécurité', 'Autre'];
+const PRIOS       = ['Critique', 'Haute', 'Moyenne', 'Basse'];
+const FALLBACK_YRS = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
 
 function Select({ value, onChange, options, allLabel }) {
   const active = value !== '';
@@ -29,13 +30,13 @@ function Select({ value, onChange, options, allLabel }) {
 }
 
 export default function FilterBar({ filters, onChange, showPlan = false, showCategorie = false, showPriorite = false }) {
-  const [annees, setAnnees] = useState([]);
+  const [annees, setAnnees] = useState(FALLBACK_YRS);
 
   useEffect(() => {
     fetch('/api/meta/annees')
       .then(r => r.json())
-      .then(data => setAnnees(Array.isArray(data) ? data : []))
-      .catch(() => {});
+      .then(data => { if (Array.isArray(data) && data.length > 0) setAnnees(data); })
+      .catch(() => { /* keep fallback */ });
   }, []);
 
   const activeCount = Object.values(filters).filter(v => v !== '').length;

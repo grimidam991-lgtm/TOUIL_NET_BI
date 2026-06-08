@@ -7,6 +7,7 @@ import {
 import KPICard from '../components/KPICard';
 import useApi from '../hooks/useApi';
 import FilterBar, { buildQS, defaultFilters } from '../components/FilterBar';
+import { niceMax } from '../utils/chart';
 
 function SectionHeader({ title }) {
   return (
@@ -28,8 +29,8 @@ export default function Performance() {
   const { data: charge }  = useApi(`/api/performance/charge-monthly${qs}`,        []);
   const { data: reponse } = useApi(`/api/performance/temps-reponse-monthly${qs}`, []);
 
-  const reponseMax = reponse.length ? Math.max(...reponse.map(r => r.ms))         * 1.25 : 1500;
-  const chargeMax  = charge.length  ? Math.max(...charge.map(r => r.requetes))    * 1.2  : 500000;
+  const reponseMax = reponse.length ? niceMax(Math.max(...reponse.map(r => r.ms)))       : 1500;
+  const chargeMax  = charge.length  ? niceMax(Math.max(...charge.map(r => r.requetes)))  : 500000;
   const incidents  = kpis.nb_incidents ?? etat.filter(e => e.name !== 'OK').reduce((s, e) => s + e.value, 0);
 
   return (
@@ -39,9 +40,7 @@ export default function Performance() {
           <div className="page-banner-title">TouilNet | Performance Serveur</div>
           <div className="page-banner-sub">CPU · RAM · Uptime · Incidents · Temps de réponse</div>
         </div>
-        <div className="page-banner-right">
-          Données en temps réel<br />Entrepôt PostgreSQL
-        </div>
+        <div className="page-banner-right">Données en temps réel<br />Entrepôt PostgreSQL</div>
       </div>
 
       <FilterBar filters={filters} onChange={setFilters} />
@@ -52,17 +51,14 @@ export default function Performance() {
           value={kpis.temps_reponse_moyen ? `${kpis.temps_reponse_moyen} ms` : '—'}
           sub="En millisecondes" subColor="#9ca3af"
           iconBg="#fef3c7" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>} />
-
         <KPICard label="💾 RAM MOYEN"
           value={kpis.ram_moyen ? `${kpis.ram_moyen}%` : '—'}
           sub="Cible : <70%" subColor="#059669"
           iconBg="#d1fae5" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>} />
-
         <KPICard label="🚨 NB INCIDENTS"
           value={incidents || '0'}
           sub="Niveau normal" subColor="#059669"
           iconBg="#fee2e2" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>} />
-
         <KPICard label="🖥️ CPU MOYEN"
           value={kpis.cpu_moyen ? `${kpis.cpu_moyen}%` : '—'}
           sub="Cible : <60%" subColor="#059669"
@@ -78,7 +74,8 @@ export default function Performance() {
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="mois" tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false} interval={3} />
               <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
-                domain={[0, 100]} tickFormatter={v => `${v}%`} width={36} />
+                domain={[0, 100]} tickCount={6} allowDecimals={false}
+                tickFormatter={v => `${v}%`} width={38} />
               <Tooltip formatter={(v) => [`${v}%`]} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
               <Line type="monotone" dataKey="ram" name="RAM" stroke="#2196F3" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
@@ -116,9 +113,11 @@ export default function Performance() {
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="mois" tick={{ fontSize: 8, fill: '#9ca3af' }} axisLine={false} tickLine={false} interval={4} />
               <YAxis yAxisId="left" tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false}
-                domain={[0, chargeMax]} tickFormatter={v => `${(v/1000).toFixed(0)}K`} width={38} />
+                domain={[0, chargeMax]} tickCount={5} allowDecimals={false}
+                tickFormatter={v => `${(v/1000).toFixed(0)}K`} width={40} />
               <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: '#d97706' }}
-                axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} domain={[0, 25]} width={34} />
+                axisLine={false} tickLine={false} tickFormatter={v => `${v}%`}
+                domain={[0, 30]} tickCount={4} allowDecimals={false} width={36} />
               <Tooltip formatter={(v, n) => [n === 'erreur' ? `${v}%` : Number(v).toLocaleString(), n === 'erreur' ? "Taux d'erreur" : 'Requêtes']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
               <Bar yAxisId="left" dataKey="requetes" name="Requêtes" fill="#1e3a8a" radius={[2, 2, 0, 0]} opacity={0.8} />
@@ -134,7 +133,8 @@ export default function Performance() {
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="mois" tick={{ fontSize: 8, fill: '#9ca3af' }} axisLine={false} tickLine={false} interval={4} />
               <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
-                domain={[0, reponseMax]} tickFormatter={v => `${v}ms`} width={44} />
+                domain={[0, reponseMax]} tickCount={5} allowDecimals={false}
+                tickFormatter={v => `${v}ms`} width={50} />
               <Tooltip formatter={(v) => [`${v} ms`, 'Temps réponse']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="ms" fill="#1e3a8a" radius={[2, 2, 0, 0]} />
             </BarChart>

@@ -6,6 +6,7 @@ import {
 import KPICard from '../components/KPICard';
 import useApi from '../hooks/useApi';
 import FilterBar, { buildQS, defaultFilters } from '../components/FilterBar';
+import { niceMax } from '../utils/chart';
 
 function SectionHeader({ title }) {
   return (
@@ -27,12 +28,11 @@ export default function Users() {
   const { data: paiement }   = useApi(`/api/business/mode-paiement${qs}`,[]);
   const { data: kpis }       = useApi(`/api/business/kpis${qs}`,         {});
 
-  const revenueMax   = revenu.length     ? Math.max(...revenu.map(r => r.revenu))     * 1.25 : 100000;
-  const topMax       = topClients.length ? Math.max(...topClients.map(r => r.revenu)) * 1.25 : 50000;
-  const paiementMax  = paiement.length   ? Math.max(...paiement.map(r => r.total))   * 1.3  : 100;
-  const tauxActif = kpis.actifs && kpis.total_abonnements
-    ? ((Number(kpis.actifs) / Number(kpis.total_abonnements)) * 100).toFixed(1)
-    : null;
+  const revenueMax  = revenu.length     ? niceMax(Math.max(...revenu.map(r => r.revenu)))     : 100000;
+  const topMax      = topClients.length ? niceMax(Math.max(...topClients.map(r => r.revenu))) : 50000;
+  const paiementMax = paiement.length   ? niceMax(Math.max(...paiement.map(r => r.total)))    : 100;
+  const tauxActif   = kpis.actifs && kpis.total_abonnements
+    ? ((Number(kpis.actifs) / Number(kpis.total_abonnements)) * 100).toFixed(1) : null;
 
   return (
     <>
@@ -41,9 +41,7 @@ export default function Users() {
           <div className="page-banner-title">TouilNet | Monétisation</div>
           <div className="page-banner-sub">ARPU · Abonnements · Revenus · Désabonnements par plan</div>
         </div>
-        <div className="page-banner-right">
-          Données en temps réel<br />Entrepôt PostgreSQL
-        </div>
+        <div className="page-banner-right">Données en temps réel<br />Entrepôt PostgreSQL</div>
       </div>
 
       <FilterBar filters={filters} onChange={setFilters} showPlan={true} />
@@ -54,17 +52,14 @@ export default function Users() {
           value={kpis.arpu ? `${Number(kpis.arpu).toLocaleString('fr-TN')} TND` : '—'}
           sub="Revenu/Client" subColor="#9ca3af"
           iconBg="#fef3c7" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>} />
-
         <KPICard label="📋 TOTAL ABONNEMENTS"
           value={kpis.total_abonnements || '—'}
           sub="Tous statuts" subColor="#9ca3af"
           iconBg="#dbeafe" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>} />
-
         <KPICard label="✅ TAUX ACTIF %"
           value={tauxActif ? `${tauxActif}%` : '—'}
           sub="Sous l'optimum" subColor="#d97706"
           iconBg="#d1fae5" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>} />
-
         <KPICard label="📉 NB CHURN"
           value={kpis.churns || '—'}
           sub="Très élevé" subColor="#dc2626"
@@ -76,11 +71,12 @@ export default function Users() {
         <div className="chart-card">
           <div className="chart-card-title">💰 Revenu par Plan</div>
           <ResponsiveContainer width="100%" height={230}>
-            <BarChart data={revenu} margin={{ top: 24, right: 20, left: 10, bottom: 4 }}>
+            <BarChart data={revenu} margin={{ top: 28, right: 20, left: 10, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="plan" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
-                domain={[0, revenueMax]} tickFormatter={v => `${(v/1000).toFixed(0)}K`} width={42} />
+                domain={[0, revenueMax]} tickCount={5} allowDecimals={false}
+                tickFormatter={v => `${(v/1000).toFixed(0)}K`} width={44} />
               <Tooltip formatter={(v) => [`${Number(v).toLocaleString('fr-TN')} TND`, 'Revenu']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="revenu" fill="#1e3a8a" radius={[4, 4, 0, 0]}
                 label={{ position: 'top', fontSize: 10, fill: '#374151', formatter: v => `${(v/1000).toFixed(0)}K` }} />
@@ -116,7 +112,8 @@ export default function Users() {
             <BarChart data={topClients} layout="vertical" margin={{ top: 4, right: 56, left: 8, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" horizontal={false} />
               <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
-                domain={[0, topMax]} tickFormatter={v => `${(v/1000).toFixed(0)}K`} />
+                domain={[0, topMax]} tickCount={5} allowDecimals={false}
+                tickFormatter={v => `${(v/1000).toFixed(0)}K`} />
               <YAxis dataKey="nom" type="category" tick={{ fontSize: 11, fill: '#374151' }}
                 axisLine={false} tickLine={false} width={80} />
               <Tooltip formatter={(v) => [`${Number(v).toLocaleString('fr-TN')} TND`, 'Revenu']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
@@ -127,12 +124,12 @@ export default function Users() {
         </div>
 
         <div className="chart-card">
-          <div className="chart-card-title">💳 Abonnements par Mode de Paiement</div>
+          <div className="chart-card-title">💳 Mode de Paiement</div>
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={paiement} layout="vertical" margin={{ top: 4, right: 48, left: 8, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" horizontal={false} />
               <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
-                domain={[0, paiementMax]} />
+                domain={[0, paiementMax]} tickCount={5} allowDecimals={false} />
               <YAxis dataKey="mode" type="category" tick={{ fontSize: 11, fill: '#374151' }}
                 axisLine={false} tickLine={false} width={80} />
               <Tooltip formatter={(v) => [v, 'Abonnements']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
