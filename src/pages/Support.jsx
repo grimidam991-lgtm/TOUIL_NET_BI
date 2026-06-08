@@ -1,0 +1,133 @@
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  PieChart, Pie, Cell, Legend, ResponsiveContainer,
+} from 'recharts';
+import KPICard from '../components/KPICard';
+import useApi from '../hooks/useApi';
+
+function SectionHeader({ title }) {
+  return (
+    <div className="section-header">
+      <div className="section-header-bar" />
+      <span className="section-header-text">{title}</span>
+      <div className="section-header-line" />
+    </div>
+  );
+}
+
+export default function Support() {
+  const { data: kpis }      = useApi('/api/support/kpis',              {});
+  const { data: csat }      = useApi('/api/support/csat-categorie',    []);
+  const { data: priorite }  = useApi('/api/support/tickets-priorite',  []);
+  const { data: categorie } = useApi('/api/support/tickets-categorie', []);
+  const { data: delai }     = useApi('/api/support/delai-priorite',    []);
+
+  const csatMax   = csat.length   ? Math.max(...csat.map(r => r.csat))   * 1.2 : 5;
+  const delaiMax  = delai.length  ? Math.max(...delai.map(r => r.delai)) * 1.2 : 320;
+  const catMax    = categorie.length ? Math.max(...categorie.map(r => r.nb)) * 1.2 : 80;
+
+  return (
+    <>
+      <div className="page-banner">
+        <div>
+          <div className="page-banner-title">TouilNet | Support Client</div>
+          <div className="page-banner-sub">Tickets · CSAT · SLA · Délais de résolution · Priorités</div>
+        </div>
+        <div className="page-banner-right">
+          Données en temps réel<br />Entrepôt PostgreSQL
+        </div>
+      </div>
+
+      <SectionHeader title="🎧 KPI — SUPPORT CLIENT" />
+      <div className="kpi-grid" style={{ marginBottom: 24 }}>
+        <KPICard label="🎫 NB TICKETS"
+          value={kpis.total_tickets || '—'}
+          sub="Total ouverts" subColor="#9ca3af"
+          iconBg="#dbeafe" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>} />
+
+        <KPICard label="✅ TAUX RÉSOLUTION"
+          value={kpis.taux_resolution_pct ? `${kpis.taux_resolution_pct}%` : '—'}
+          sub="Cible : >85%" subColor="#d97706"
+          iconBg="#d1fae5" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>} />
+
+        <KPICard label="🚨 NB CRITIQUES"
+          value={kpis.critiques || '—'}
+          sub="À traiter" subColor="#dc2626"
+          iconBg="#fee2e2" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>} />
+
+        <KPICard label="⏰ DÉLAI RÉSOLUTION"
+          value={kpis.delai_moyen_h || '—'}
+          sub="En heures" subColor="#9ca3af"
+          iconBg="#ede9fe" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>} />
+      </div>
+
+      <SectionHeader title="📋 ANALYSES TICKETS" />
+      <div className="chart-grid">
+        <div className="chart-card">
+          <div className="chart-card-title">😊 CSAT par Catégorie</div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={csat} margin={{ top: 16, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+              <XAxis dataKey="categorie" tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} domain={[0, csatMax]} />
+              <Tooltip formatter={(v) => [`${v}/5`, 'CSAT']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
+              <Bar dataKey="csat" fill="#1e3a8a" radius={[4, 4, 0, 0]}
+                label={{ position: 'top', fontSize: 10, fill: '#374151' }} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-card">
+          <div className="chart-card-title">🍩 Tickets par Priorité</div>
+          <ResponsiveContainer width="100%" height={220}>
+            <PieChart>
+              <Pie data={priorite} cx="50%" cy="48%" innerRadius={58} outerRadius={88}
+                dataKey="value" paddingAngle={2} label={false} labelLine={false}>
+                {priorite.map((e, i) => <Cell key={i} fill={e.color} stroke="none" />)}
+              </Pie>
+              <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+                formatter={(value, entry) => (
+                  <span style={{ color: '#374151' }}>
+                    {value}&nbsp;
+                    <span style={{ color: '#111827', fontWeight: 700 }}>{entry.payload.value}</span>
+                    <span style={{ color: '#9ca3af', marginLeft: 4 }}>({entry.payload.pct}%)</span>
+                  </span>
+                )} />
+              <Tooltip formatter={(v) => [v, 'Tickets']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="chart-grid">
+        <div className="chart-card">
+          <div className="chart-card-title">📊 Tickets par Catégorie</div>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={categorie} layout="vertical" margin={{ top: 4, right: 40, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} domain={[0, catMax]} />
+              <YAxis dataKey="categorie" type="category" tick={{ fontSize: 11, fill: '#374151' }} axisLine={false} tickLine={false} width={100} />
+              <Tooltip formatter={(v) => [v, 'Tickets']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
+              <Bar dataKey="nb" fill="#1e3a8a" radius={[0, 4, 4, 0]}
+                label={{ position: 'right', fontSize: 10, fill: '#374151' }} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-card">
+          <div className="chart-card-title">⏱️ Délai Résolution par Priorité (heures)</div>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={delai} margin={{ top: 16, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+              <XAxis dataKey="priorite" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} domain={[0, delaiMax]} />
+              <Tooltip formatter={(v) => [`${v}h`, 'Délai moyen']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
+              <Bar dataKey="delai" fill="#1e3a8a" radius={[4, 4, 0, 0]}
+                label={{ position: 'top', fontSize: 10, fill: '#374151' }} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </>
+  );
+}
