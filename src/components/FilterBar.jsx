@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 const MOIS_FR = [
   { v: 1,  l: 'Janvier' }, { v: 2,  l: 'Février' },  { v: 3,  l: 'Mars' },
   { v: 4,  l: 'Avril' },   { v: 5,  l: 'Mai' },       { v: 6,  l: 'Juin' },
@@ -7,10 +5,9 @@ const MOIS_FR = [
   { v: 10, l: 'Octobre' }, { v: 11, l: 'Novembre' },  { v: 12, l: 'Décembre' },
 ];
 
-const PLANS       = ['Premium', 'Standard', 'Entreprise'];
-const CATS        = ['Bug', 'Fonctionnalité', 'Performance', 'Facturation', 'Sécurité', 'Autre'];
-const PRIOS       = ['Critique', 'Haute', 'Moyenne', 'Basse'];
-const FALLBACK_YRS = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+const PLANS = ['Premium', 'Standard', 'Entreprise'];
+const CATS  = ['Bug', 'Fonctionnalité', 'Performance', 'Facturation', 'Sécurité', 'Autre'];
+const PRIOS = ['Critique', 'Haute', 'Moyenne', 'Basse'];
 
 function Select({ value, onChange, options, allLabel }) {
   const active = value !== '';
@@ -29,16 +26,10 @@ function Select({ value, onChange, options, allLabel }) {
   );
 }
 
-export default function FilterBar({ filters, onChange, showPlan = false, showCategorie = false, showPriorite = false }) {
-  const [annees, setAnnees] = useState(FALLBACK_YRS);
-
-  useEffect(() => {
-    fetch('/api/meta/annees')
-      .then(r => r.json())
-      .then(data => { if (Array.isArray(data) && data.length > 0) setAnnees(data); })
-      .catch(() => { /* keep fallback */ });
-  }, []);
-
+export default function FilterBar({
+  filters, onChange, annees = [],
+  showPlan = false, showCategorie = false, showPriorite = false,
+}) {
   const activeCount = Object.values(filters).filter(v => v !== '').length;
   const set = (key) => (val) => onChange({ ...filters, [key]: val });
   const reset = () => onChange({ annee: '', mois: '', plan: '', categorie: '', priorite: '' });
@@ -66,12 +57,10 @@ export default function FilterBar({ filters, onChange, showPlan = false, showCat
           <Select value={filters.plan} onChange={set('plan')}
             options={PLANS} allLabel="Tous les plans" />
         )}
-
         {showCategorie && (
           <Select value={filters.categorie} onChange={set('categorie')}
             options={CATS} allLabel="Toutes les catégories" />
         )}
-
         {showPriorite && (
           <Select value={filters.priorite} onChange={set('priorite')}
             options={PRIOS} allLabel="Toutes les priorités" />

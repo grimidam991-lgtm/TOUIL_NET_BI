@@ -22,6 +22,7 @@ export default function Users() {
   const [filters, setFilters] = useState(defaultFilters);
   const qs = buildQS(filters);
 
+  const { data: annees }     = useApi('/api/business/annees', []);
   const { data: revenu }     = useApi(`/api/business/revenu-plan${qs}`,  []);
   const { data: desabo }     = useApi(`/api/business/desabo-plan${qs}`,  []);
   const { data: topClients } = useApi(`/api/business/top-clients${qs}`,  []);
@@ -44,7 +45,7 @@ export default function Users() {
         <div className="page-banner-right">Données en temps réel<br />Entrepôt PostgreSQL</div>
       </div>
 
-      <FilterBar filters={filters} onChange={setFilters} showPlan={true} />
+      <FilterBar filters={filters} onChange={setFilters} annees={annees} showPlan={true} />
 
       <SectionHeader title="💰 KPI — PERFORMANCE FINANCIÈRE" />
       <div className="kpi-grid" style={{ marginBottom: 24 }}>

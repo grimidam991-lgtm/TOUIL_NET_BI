@@ -22,6 +22,7 @@ export default function Tech() {
   const [filters, setFilters] = useState(defaultFilters);
   const qs = buildQS(filters);
 
+  const { data: annees }          = useApi('/api/users/annees', []);
   const { data: kpis }            = useApi(`/api/users/kpis${qs}`,               {});
   const { data: sessionsMonthly } = useApi(`/api/users/sessions-monthly${qs}`,   []);
   const { data: sessionsOS }      = useApi(`/api/users/sessions-os${qs}`,        []);
@@ -44,7 +45,7 @@ export default function Tech() {
         <div className="page-banner-right">Données en temps réel<br />Entrepôt PostgreSQL</div>
       </div>
 
-      <FilterBar filters={filters} onChange={setFilters} />
+      <FilterBar filters={filters} onChange={setFilters} annees={annees} />
 
       <SectionHeader title="👥 KPI — ENGAGEMENT UTILISATEURS" />
       <div className="kpi-grid" style={{ marginBottom: 24 }}>

@@ -23,6 +23,7 @@ export default function Performance() {
   const [filters, setFilters] = useState(defaultFilters);
   const qs = buildQS(filters);
 
+  const { data: annees }  = useApi('/api/performance/annees', []);
   const { data: kpis }    = useApi(`/api/performance/kpis${qs}`,                  {});
   const { data: cpuRam }  = useApi(`/api/performance/cpu-ram-monthly${qs}`,       []);
   const { data: etat }    = useApi(`/api/performance/etat-serveur${qs}`,          []);
@@ -43,7 +44,7 @@ export default function Performance() {
         <div className="page-banner-right">Données en temps réel<br />Entrepôt PostgreSQL</div>
       </div>
 
-      <FilterBar filters={filters} onChange={setFilters} />
+      <FilterBar filters={filters} onChange={setFilters} annees={annees} />
 
       <SectionHeader title="🖥️ KPI — PERFORMANCE TECHNIQUE" />
       <div className="kpi-grid" style={{ marginBottom: 24 }}>

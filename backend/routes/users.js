@@ -15,6 +15,18 @@ function sesWhere(annee, mois) {
   return { params, where: clauses.length ? 'AND ' + clauses.join(' AND ') : '' };
 }
 
+/* Années disponibles */
+router.get('/annees', async (_, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT DISTINCT t.annee FROM technova_dw.fact_sessions s
+      JOIN technova_dw.dim_time t ON t.date_sk = s.date_sk
+      ORDER BY t.annee ASC
+    `);
+    res.json(rows.map(r => Number(r.annee)));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 /* KPIs engagement */
 router.get('/kpis', async (req, res) => {
   try {

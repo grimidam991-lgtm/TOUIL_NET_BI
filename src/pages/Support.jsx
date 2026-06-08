@@ -22,6 +22,7 @@ export default function Support() {
   const [filters, setFilters] = useState(defaultFilters);
   const qs = buildQS(filters);
 
+  const { data: annees }    = useApi('/api/support/annees', []);
   const { data: kpis }      = useApi(`/api/support/kpis${qs}`,              {});
   const { data: csat }      = useApi(`/api/support/csat-categorie${qs}`,    []);
   const { data: priorite }  = useApi(`/api/support/tickets-priorite${qs}`,  []);
@@ -42,7 +43,7 @@ export default function Support() {
         <div className="page-banner-right">Données en temps réel<br />Entrepôt PostgreSQL</div>
       </div>
 
-      <FilterBar filters={filters} onChange={setFilters} showCategorie={true} showPriorite={true} />
+      <FilterBar filters={filters} onChange={setFilters} annees={annees} showCategorie={true} showPriorite={true} />
 
       <SectionHeader title="🎧 KPI — SUPPORT CLIENT" />
       <div className="kpi-grid" style={{ marginBottom: 24 }}>

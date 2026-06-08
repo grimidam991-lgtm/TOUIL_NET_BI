@@ -22,6 +22,7 @@ export default function Business() {
   const [filters, setFilters] = useState(defaultFilters);
   const qs = buildQS(filters);
 
+  const { data: annees }  = useApi('/api/business/annees', []);
   const { data: mrr }     = useApi(`/api/business/mrr${qs}`,               []);
   const { data: plans }   = useApi(`/api/business/plan-distribution${qs}`, []);
   const { data: tickets } = useApi(`/api/support/tickets-categorie${qs}`,  []);
@@ -42,7 +43,7 @@ export default function Business() {
         <div className="page-banner-right">Données en temps réel<br />Entrepôt PostgreSQL</div>
       </div>
 
-      <FilterBar filters={filters} onChange={setFilters} showPlan={true} />
+      <FilterBar filters={filters} onChange={setFilters} annees={annees} showPlan={true} />
 
       <SectionHeader title="📊 KPI — INDICATEURS STRATÉGIQUES" />
       <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(5,1fr)', marginBottom: 24 }}>
