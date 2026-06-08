@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   PieChart, Pie, Cell, Legend, ResponsiveContainer,
 } from 'recharts';
 import KPICard from '../components/KPICard';
 import useApi from '../hooks/useApi';
+import FilterBar, { buildQS, defaultFilters } from '../components/FilterBar';
 
 function SectionHeader({ title }) {
   return (
@@ -16,11 +18,14 @@ function SectionHeader({ title }) {
 }
 
 export default function Users() {
-  const { data: revenu }    = useApi('/api/business/revenu-plan',  []);
-  const { data: desabo }    = useApi('/api/business/desabo-plan',  []);
-  const { data: topClients }= useApi('/api/business/top-clients',  []);
-  const { data: paiement }  = useApi('/api/business/mode-paiement',[]);
-  const { data: kpis }      = useApi('/api/business/kpis',         {});
+  const [filters, setFilters] = useState(defaultFilters);
+  const qs = buildQS(filters);
+
+  const { data: revenu }    = useApi(`/api/business/revenu-plan${qs}`,  []);
+  const { data: desabo }    = useApi(`/api/business/desabo-plan${qs}`,  []);
+  const { data: topClients }= useApi(`/api/business/top-clients${qs}`,  []);
+  const { data: paiement }  = useApi(`/api/business/mode-paiement${qs}`,[]);
+  const { data: kpis }      = useApi(`/api/business/kpis${qs}`,         {});
 
   const revenueMax = revenu.length ? Math.max(...revenu.map(r => r.revenu)) * 1.15 : 100000;
   const tauxActif  = kpis.actifs && kpis.total_abonnements
@@ -38,6 +43,8 @@ export default function Users() {
           Données en temps réel<br />Entrepôt PostgreSQL
         </div>
       </div>
+
+      <FilterBar filters={filters} onChange={setFilters} showPlan={true} />
 
       <SectionHeader title="💰 KPI — PERFORMANCE FINANCIÈRE" />
       <div className="kpi-grid" style={{ marginBottom: 24 }}>

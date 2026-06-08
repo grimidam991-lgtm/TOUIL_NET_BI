@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   PieChart, Pie, Cell, Legend, ResponsiveContainer,
 } from 'recharts';
 import KPICard from '../components/KPICard';
 import useApi from '../hooks/useApi';
+import FilterBar, { buildQS, defaultFilters } from '../components/FilterBar';
 
 function SectionHeader({ title }) {
   return (
@@ -16,11 +18,14 @@ function SectionHeader({ title }) {
 }
 
 export default function Support() {
-  const { data: kpis }      = useApi('/api/support/kpis',              {});
-  const { data: csat }      = useApi('/api/support/csat-categorie',    []);
-  const { data: priorite }  = useApi('/api/support/tickets-priorite',  []);
-  const { data: categorie } = useApi('/api/support/tickets-categorie', []);
-  const { data: delai }     = useApi('/api/support/delai-priorite',    []);
+  const [filters, setFilters] = useState(defaultFilters);
+  const qs = buildQS(filters);
+
+  const { data: kpis }      = useApi(`/api/support/kpis${qs}`,              {});
+  const { data: csat }      = useApi(`/api/support/csat-categorie${qs}`,    []);
+  const { data: priorite }  = useApi(`/api/support/tickets-priorite${qs}`,  []);
+  const { data: categorie } = useApi(`/api/support/tickets-categorie${qs}`, []);
+  const { data: delai }     = useApi(`/api/support/delai-priorite${qs}`,    []);
 
   const csatMax   = csat.length   ? Math.max(...csat.map(r => r.csat))   * 1.2 : 5;
   const delaiMax  = delai.length  ? Math.max(...delai.map(r => r.delai)) * 1.2 : 320;
@@ -37,6 +42,8 @@ export default function Support() {
           Données en temps réel<br />Entrepôt PostgreSQL
         </div>
       </div>
+
+      <FilterBar filters={filters} onChange={setFilters} showCategorie={true} showPriorite={true} />
 
       <SectionHeader title="🎧 KPI — SUPPORT CLIENT" />
       <div className="kpi-grid" style={{ marginBottom: 24 }}>

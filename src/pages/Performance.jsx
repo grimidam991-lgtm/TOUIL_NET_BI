@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   LineChart, Line, BarChart, Bar, ComposedChart,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -5,6 +6,7 @@ import {
 } from 'recharts';
 import KPICard from '../components/KPICard';
 import useApi from '../hooks/useApi';
+import FilterBar, { buildQS, defaultFilters } from '../components/FilterBar';
 
 function SectionHeader({ title }) {
   return (
@@ -17,11 +19,14 @@ function SectionHeader({ title }) {
 }
 
 export default function Performance() {
-  const { data: kpis }      = useApi('/api/performance/kpis',               {});
-  const { data: cpuRam }    = useApi('/api/performance/cpu-ram-monthly',    []);
-  const { data: etat }      = useApi('/api/performance/etat-serveur',       []);
-  const { data: charge }    = useApi('/api/performance/charge-monthly',     []);
-  const { data: reponse }   = useApi('/api/performance/temps-reponse-monthly', []);
+  const [filters, setFilters] = useState(defaultFilters);
+  const qs = buildQS(filters);
+
+  const { data: kpis }      = useApi(`/api/performance/kpis${qs}`,               {});
+  const { data: cpuRam }    = useApi(`/api/performance/cpu-ram-monthly${qs}`,    []);
+  const { data: etat }      = useApi(`/api/performance/etat-serveur${qs}`,       []);
+  const { data: charge }    = useApi(`/api/performance/charge-monthly${qs}`,     []);
+  const { data: reponse }   = useApi(`/api/performance/temps-reponse-monthly${qs}`, []);
 
   const reponseMax = reponse.length ? Math.max(...reponse.map(r => r.ms)) * 1.2 : 1500;
   const chargeMax  = charge.length  ? Math.max(...charge.map(r => r.requetes)) * 1.15 : 500000;
@@ -38,6 +43,8 @@ export default function Performance() {
           Données en temps réel<br />Entrepôt PostgreSQL
         </div>
       </div>
+
+      <FilterBar filters={filters} onChange={setFilters} />
 
       <SectionHeader title="🖥️ KPI — PERFORMANCE TECHNIQUE" />
       <div className="kpi-grid" style={{ marginBottom: 24 }}>

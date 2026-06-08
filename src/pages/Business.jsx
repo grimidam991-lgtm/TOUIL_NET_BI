@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts';
 import KPICard from '../components/KPICard';
 import useApi from '../hooks/useApi';
+import FilterBar, { buildQS, defaultFilters } from '../components/FilterBar';
 
 function SectionHeader({ title }) {
   return (
@@ -16,11 +18,14 @@ function SectionHeader({ title }) {
 }
 
 export default function Business() {
-  const { data: mrr }     = useApi('/api/business/mrr',               []);
-  const { data: plans }   = useApi('/api/business/plan-distribution', []);
-  const { data: tickets } = useApi('/api/support/tickets-categorie',  []);
-  const { data: devices } = useApi('/api/users/sessions-device',      []);
-  const { data: kpis }    = useApi('/api/business/kpis',              {});
+  const [filters, setFilters] = useState(defaultFilters);
+  const qs = buildQS(filters);
+
+  const { data: mrr }     = useApi(`/api/business/mrr${qs}`,               []);
+  const { data: plans }   = useApi(`/api/business/plan-distribution${qs}`, []);
+  const { data: tickets } = useApi(`/api/support/tickets-categorie${qs}`,  []);
+  const { data: devices } = useApi(`/api/users/sessions-device${qs}`,      []);
+  const { data: kpis }    = useApi(`/api/business/kpis${qs}`,              {});
 
   const mrrMax = mrr.length ? Math.max(...mrr.map(r => r.mrr)) * 1.2 : 2000;
 
@@ -35,6 +40,8 @@ export default function Business() {
           Données en temps réel<br />Entrepôt PostgreSQL
         </div>
       </div>
+
+      <FilterBar filters={filters} onChange={setFilters} showPlan={true} />
 
       <SectionHeader title="📊 KPI — INDICATEURS STRATÉGIQUES" />
       <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(5,1fr)', marginBottom: 24 }}>

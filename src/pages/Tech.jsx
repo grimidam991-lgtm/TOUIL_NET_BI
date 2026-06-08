@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts';
 import KPICard from '../components/KPICard';
 import useApi from '../hooks/useApi';
+import FilterBar, { buildQS, defaultFilters } from '../components/FilterBar';
 
 function SectionHeader({ title }) {
   return (
@@ -16,12 +18,15 @@ function SectionHeader({ title }) {
 }
 
 export default function Tech() {
-  const { data: kpis }            = useApi('/api/users/kpis',               {});
-  const { data: sessionsMonthly } = useApi('/api/users/sessions-monthly',   []);
-  const { data: sessionsOS }      = useApi('/api/users/sessions-os',        []);
-  const { data: topPages }        = useApi('/api/users/top-pages',          []);
-  const { data: sessionsNav }     = useApi('/api/users/sessions-navigateur',[]);
-  const { data: sessionsPays }    = useApi('/api/users/sessions-pays',      []);
+  const [filters, setFilters] = useState(defaultFilters);
+  const qs = buildQS(filters);
+
+  const { data: kpis }            = useApi(`/api/users/kpis${qs}`,               {});
+  const { data: sessionsMonthly } = useApi(`/api/users/sessions-monthly${qs}`,   []);
+  const { data: sessionsOS }      = useApi(`/api/users/sessions-os${qs}`,        []);
+  const { data: topPages }        = useApi(`/api/users/top-pages${qs}`,          []);
+  const { data: sessionsNav }     = useApi(`/api/users/sessions-navigateur${qs}`,[]);
+  const { data: sessionsPays }    = useApi(`/api/users/sessions-pays${qs}`,      []);
 
   const paysMax = sessionsPays.length ? sessionsPays[0]?.nb || 1 : 1;
 
@@ -36,6 +41,8 @@ export default function Tech() {
           Données en temps réel<br />Entrepôt PostgreSQL
         </div>
       </div>
+
+      <FilterBar filters={filters} onChange={setFilters} />
 
       <SectionHeader title="👥 KPI — ENGAGEMENT UTILISATEURS" />
       <div className="kpi-grid" style={{ marginBottom: 24 }}>
