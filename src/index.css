@@ -542,33 +542,29 @@ body {
 }
 
 /* ══════════════════════════════════════════
-   FILTER BAR
+   FILTER BAR — CHIP STYLE
 ══════════════════════════════════════════ */
-.filter-bar {
+.filter-bar-chips {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 8px 14px;
+  padding: 10px 16px;
   margin-bottom: 16px;
   flex-wrap: wrap;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
-.filter-bar-left {
+.fc-header {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding-right: 10px;
-  border-right: 1px solid #e5e7eb;
   flex-shrink: 0;
 }
 
-.filter-bar-icon { display: flex; align-items: center; }
-
-.filter-bar-label {
+.fc-title {
   font-size: 11px;
   font-weight: 700;
   color: #1e3a8a;
@@ -576,7 +572,7 @@ body {
   letter-spacing: 0.08em;
 }
 
-.filter-bar-badge {
+.fc-badge {
   background: #1e3a8a;
   color: #fff;
   border-radius: 10px;
@@ -585,46 +581,72 @@ body {
   font-weight: 700;
 }
 
-.filter-bar-selects {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  flex: 1;
+.fc-divider {
+  width: 1px;
+  height: 28px;
+  background: #e5e7eb;
+  flex-shrink: 0;
 }
 
-.fb-select-wrap {
+.fc-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 1;
+  align-items: center;
+}
+
+.fc-group {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #f4f5fb;
+}
+
+.fc-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.fc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.fc-chip {
+  padding: 4px 11px;
+  border-radius: 20px;
   border: 1.5px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 5px 10px;
-  color: #6b7280;
-  transition: all 0.15s;
-  cursor: pointer;
-}
-
-.fb-select-wrap.active {
-  background: #eff6ff;
-  border-color: #93c5fd;
-  color: #1e3a8a;
-}
-
-.fb-select-wrap select {
-  border: none;
-  background: transparent;
-  outline: none;
+  background: #f9fafb;
+  color: #4b5563;
   font-size: 12px;
   font-weight: 500;
   font-family: inherit;
-  color: inherit;
   cursor: pointer;
-  padding-right: 4px;
+  transition: all 0.15s;
+  white-space: nowrap;
+  line-height: 1.4;
 }
 
-.filter-bar-reset {
+.fc-chip:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+
+.fc-chip.active {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.fc-reset {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -641,7 +663,7 @@ body {
   flex-shrink: 0;
 }
 
-.filter-bar-reset:hover {
+.fc-reset:hover {
   background: #fee2e2;
   border-color: #f87171;
 }
