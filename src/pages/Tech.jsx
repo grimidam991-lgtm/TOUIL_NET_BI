@@ -28,7 +28,9 @@ export default function Tech() {
   const { data: sessionsNav }     = useApi(`/api/users/sessions-navigateur${qs}`,[]);
   const { data: sessionsPays }    = useApi(`/api/users/sessions-pays${qs}`,      []);
 
-  const paysMax = sessionsPays.length ? sessionsPays[0]?.nb || 1 : 1;
+  const paysMax  = sessionsPays.length  ? sessionsPays[0]?.nb || 1                        : 1;
+  const navMax   = sessionsNav.length   ? Math.max(...sessionsNav.map(r => r.nb))  * 1.3  : 200;
+  const pagesMax = topPages.length      ? Math.max(...topPages.map(r => r.nb))     * 1.3  : 200;
 
   return (
     <>
@@ -71,12 +73,12 @@ export default function Tech() {
       <div className="chart-grid">
         <div className="chart-card">
           <div className="chart-card-title">📈 Évolution mensuelle des Sessions</div>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={sessionsMonthly} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={230}>
+            <LineChart data={sessionsMonthly} margin={{ top: 16, right: 20, left: 10, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="mois" tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false} interval={3} />
-              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-              <Tooltip formatter={(v) => [v, 'Nb Sessions']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
+              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} width={34} />
+              <Tooltip formatter={(v) => [v, 'Sessions']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Line type="monotone" dataKey="nb" stroke="#1e3a8a" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -84,13 +86,13 @@ export default function Tech() {
 
         <div className="chart-card">
           <div className="chart-card-title">🍩 Sessions par OS</div>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={230}>
             <PieChart>
-              <Pie data={sessionsOS} cx="50%" cy="48%" innerRadius={58} outerRadius={88}
+              <Pie data={sessionsOS} cx="50%" cy="45%" innerRadius={60} outerRadius={90}
                 dataKey="value" paddingAngle={2} label={false} labelLine={false}>
                 {sessionsOS.map((e, i) => <Cell key={i} fill={e.color} stroke="none" />)}
               </Pie>
-              <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+              <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12, paddingTop: 4 }}
                 formatter={(value, entry) => (
                   <span style={{ color: '#374151' }}>
                     {value}&nbsp;
@@ -105,12 +107,14 @@ export default function Tech() {
 
       <div className="chart-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
         <div className="chart-card">
-          <div className="chart-card-title">🏆 Top 5 Pages Visitées</div>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={topPages} layout="vertical" margin={{ top: 4, right: 20, left: 0, bottom: 0 }}>
+          <div className="chart-card-title">🏆 Top Pages Visitées</div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={topPages} layout="vertical" margin={{ top: 4, right: 44, left: 8, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-              <YAxis dataKey="page" type="category" tick={{ fontSize: 11, fill: '#374151' }} axisLine={false} tickLine={false} width={55} />
+              <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
+                domain={[0, pagesMax]} />
+              <YAxis dataKey="page" type="category" tick={{ fontSize: 10, fill: '#374151' }}
+                axisLine={false} tickLine={false} width={60} />
               <Tooltip formatter={(v) => [v, 'Sessions']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="nb" fill="#1e3a8a" radius={[0, 4, 4, 0]}
                 label={{ position: 'right', fontSize: 10, fill: '#374151' }} />
@@ -120,11 +124,12 @@ export default function Tech() {
 
         <div className="chart-card">
           <div className="chart-card-title">🌍 Sessions par Navigateur</div>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={sessionsNav} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={sessionsNav} margin={{ top: 24, right: 20, left: 10, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="nav" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
+                domain={[0, navMax]} width={34} />
               <Tooltip formatter={(v) => [v, 'Sessions']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="nb" fill="#1e3a8a" radius={[4, 4, 0, 0]}
                 label={{ position: 'top', fontSize: 10, fill: '#374151' }} />

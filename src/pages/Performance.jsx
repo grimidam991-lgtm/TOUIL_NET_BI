@@ -22,14 +22,14 @@ export default function Performance() {
   const [filters, setFilters] = useState(defaultFilters);
   const qs = buildQS(filters);
 
-  const { data: kpis }      = useApi(`/api/performance/kpis${qs}`,               {});
-  const { data: cpuRam }    = useApi(`/api/performance/cpu-ram-monthly${qs}`,    []);
-  const { data: etat }      = useApi(`/api/performance/etat-serveur${qs}`,       []);
-  const { data: charge }    = useApi(`/api/performance/charge-monthly${qs}`,     []);
-  const { data: reponse }   = useApi(`/api/performance/temps-reponse-monthly${qs}`, []);
+  const { data: kpis }    = useApi(`/api/performance/kpis${qs}`,                  {});
+  const { data: cpuRam }  = useApi(`/api/performance/cpu-ram-monthly${qs}`,       []);
+  const { data: etat }    = useApi(`/api/performance/etat-serveur${qs}`,          []);
+  const { data: charge }  = useApi(`/api/performance/charge-monthly${qs}`,        []);
+  const { data: reponse } = useApi(`/api/performance/temps-reponse-monthly${qs}`, []);
 
-  const reponseMax = reponse.length ? Math.max(...reponse.map(r => r.ms)) * 1.2 : 1500;
-  const chargeMax  = charge.length  ? Math.max(...charge.map(r => r.requetes)) * 1.15 : 500000;
+  const reponseMax = reponse.length ? Math.max(...reponse.map(r => r.ms))         * 1.25 : 1500;
+  const chargeMax  = charge.length  ? Math.max(...charge.map(r => r.requetes))    * 1.2  : 500000;
   const incidents  = kpis.nb_incidents ?? etat.filter(e => e.name !== 'OK').reduce((s, e) => s + e.value, 0);
 
   return (
@@ -73,28 +73,29 @@ export default function Performance() {
       <div className="chart-grid">
         <div className="chart-card">
           <div className="chart-card-title">📈 CPU & RAM — Évolution</div>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={cpuRam} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={230}>
+            <LineChart data={cpuRam} margin={{ top: 16, right: 20, left: 10, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="mois" tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false} interval={3} />
-              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} domain={[20, 90]} tickFormatter={v => `${v}%`} />
+              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
+                domain={[0, 100]} tickFormatter={v => `${v}%`} width={36} />
               <Tooltip formatter={(v) => [`${v}%`]} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-              <Line type="monotone" dataKey="ram" name="RAM Moyen" stroke="#2196F3" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
-              <Line type="monotone" dataKey="cpu" name="CPU Moyen" stroke="#1e3a8a" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+              <Line type="monotone" dataKey="ram" name="RAM" stroke="#2196F3" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+              <Line type="monotone" dataKey="cpu" name="CPU" stroke="#1e3a8a" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         <div className="chart-card">
           <div className="chart-card-title">🍩 État du Serveur</div>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={230}>
             <PieChart>
-              <Pie data={etat} cx="50%" cy="48%" innerRadius={58} outerRadius={88}
+              <Pie data={etat} cx="50%" cy="45%" innerRadius={60} outerRadius={90}
                 dataKey="value" paddingAngle={2} label={false} labelLine={false}>
                 {etat.map((e, i) => <Cell key={i} fill={e.color} stroke="none" />)}
               </Pie>
-              <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+              <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12, paddingTop: 4 }}
                 formatter={(value, entry) => (
                   <span style={{ color: '#374151' }}>
                     {value}&nbsp;
@@ -110,14 +111,14 @@ export default function Performance() {
       <div className="chart-grid">
         <div className="chart-card">
           <div className="chart-card-title">📊 Charge Serveur & Taux d'erreur</div>
-          <ResponsiveContainer width="100%" height={210}>
-            <ComposedChart data={charge} margin={{ top: 4, right: 30, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={220}>
+            <ComposedChart data={charge} margin={{ top: 16, right: 44, left: 10, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="mois" tick={{ fontSize: 8, fill: '#9ca3af' }} axisLine={false} tickLine={false} interval={4} />
               <YAxis yAxisId="left" tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false}
-                domain={[0, chargeMax]} tickFormatter={v => `${(v/1000).toFixed(0)}K`} />
+                domain={[0, chargeMax]} tickFormatter={v => `${(v/1000).toFixed(0)}K`} width={38} />
               <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: '#d97706' }}
-                axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} domain={[0, 25]} />
+                axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} domain={[0, 25]} width={34} />
               <Tooltip formatter={(v, n) => [n === 'erreur' ? `${v}%` : Number(v).toLocaleString(), n === 'erreur' ? "Taux d'erreur" : 'Requêtes']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
               <Bar yAxisId="left" dataKey="requetes" name="Requêtes" fill="#1e3a8a" radius={[2, 2, 0, 0]} opacity={0.8} />
@@ -128,12 +129,12 @@ export default function Performance() {
 
         <div className="chart-card">
           <div className="chart-card-title">⏱️ Temps de Réponse par mois (ms)</div>
-          <ResponsiveContainer width="100%" height={210}>
-            <BarChart data={reponse} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={reponse} margin={{ top: 16, right: 20, left: 10, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="mois" tick={{ fontSize: 8, fill: '#9ca3af' }} axisLine={false} tickLine={false} interval={4} />
               <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
-                domain={[0, reponseMax]} tickFormatter={v => `${v}ms`} />
+                domain={[0, reponseMax]} tickFormatter={v => `${v}ms`} width={44} />
               <Tooltip formatter={(v) => [`${v} ms`, 'Temps réponse']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="ms" fill="#1e3a8a" radius={[2, 2, 0, 0]} />
             </BarChart>

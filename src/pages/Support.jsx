@@ -27,9 +27,9 @@ export default function Support() {
   const { data: categorie } = useApi(`/api/support/tickets-categorie${qs}`, []);
   const { data: delai }     = useApi(`/api/support/delai-priorite${qs}`,    []);
 
-  const csatMax   = csat.length   ? Math.max(...csat.map(r => r.csat))   * 1.2 : 5;
-  const delaiMax  = delai.length  ? Math.max(...delai.map(r => r.delai)) * 1.2 : 320;
-  const catMax    = categorie.length ? Math.max(...categorie.map(r => r.nb)) * 1.2 : 80;
+  const csatMax  = csat.length      ? Math.max(...csat.map(r => r.csat))      * 1.2  : 5;
+  const delaiMax = delai.length     ? Math.max(...delai.map(r => r.delai))    * 1.25 : 320;
+  const catMax   = categorie.length ? Math.max(...categorie.map(r => r.nb))   * 1.3  : 80;
 
   return (
     <>
@@ -72,11 +72,12 @@ export default function Support() {
       <div className="chart-grid">
         <div className="chart-card">
           <div className="chart-card-title">😊 CSAT par Catégorie</div>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={csat} margin={{ top: 16, right: 8, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={230}>
+            <BarChart data={csat} margin={{ top: 24, right: 20, left: 10, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="categorie" tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} domain={[0, csatMax]} />
+              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
+                domain={[0, csatMax]} width={32} />
               <Tooltip formatter={(v) => [`${v}/5`, 'CSAT']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="csat" fill="#1e3a8a" radius={[4, 4, 0, 0]}
                 label={{ position: 'top', fontSize: 10, fill: '#374151' }} />
@@ -86,13 +87,13 @@ export default function Support() {
 
         <div className="chart-card">
           <div className="chart-card-title">🍩 Tickets par Priorité</div>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={230}>
             <PieChart>
-              <Pie data={priorite} cx="50%" cy="48%" innerRadius={58} outerRadius={88}
+              <Pie data={priorite} cx="50%" cy="45%" innerRadius={60} outerRadius={90}
                 dataKey="value" paddingAngle={2} label={false} labelLine={false}>
                 {priorite.map((e, i) => <Cell key={i} fill={e.color} stroke="none" />)}
               </Pie>
-              <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+              <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12, paddingTop: 4 }}
                 formatter={(value, entry) => (
                   <span style={{ color: '#374151' }}>
                     {value}&nbsp;
@@ -109,11 +110,13 @@ export default function Support() {
       <div className="chart-grid">
         <div className="chart-card">
           <div className="chart-card-title">📊 Tickets par Catégorie</div>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={categorie} layout="vertical" margin={{ top: 4, right: 40, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={230}>
+            <BarChart data={categorie} layout="vertical" margin={{ top: 4, right: 48, left: 8, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} domain={[0, catMax]} />
-              <YAxis dataKey="categorie" type="category" tick={{ fontSize: 11, fill: '#374151' }} axisLine={false} tickLine={false} width={100} />
+              <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
+                domain={[0, catMax]} />
+              <YAxis dataKey="categorie" type="category" tick={{ fontSize: 11, fill: '#374151' }}
+                axisLine={false} tickLine={false} width={110} />
               <Tooltip formatter={(v) => [v, 'Tickets']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="nb" fill="#1e3a8a" radius={[0, 4, 4, 0]}
                 label={{ position: 'right', fontSize: 10, fill: '#374151' }} />
@@ -123,14 +126,15 @@ export default function Support() {
 
         <div className="chart-card">
           <div className="chart-card-title">⏱️ Délai Résolution par Priorité (heures)</div>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={delai} margin={{ top: 16, right: 8, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={230}>
+            <BarChart data={delai} margin={{ top: 24, right: 20, left: 10, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="priorite" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} domain={[0, delaiMax]} />
+              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
+                domain={[0, delaiMax]} tickFormatter={v => `${v}h`} width={36} />
               <Tooltip formatter={(v) => [`${v}h`, 'Délai moyen']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="delai" fill="#1e3a8a" radius={[4, 4, 0, 0]}
-                label={{ position: 'top', fontSize: 10, fill: '#374151' }} />
+                label={{ position: 'top', fontSize: 10, fill: '#374151', formatter: v => `${v}h` }} />
             </BarChart>
           </ResponsiveContainer>
         </div>

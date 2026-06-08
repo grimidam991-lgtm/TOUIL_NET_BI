@@ -21,14 +21,16 @@ export default function Users() {
   const [filters, setFilters] = useState(defaultFilters);
   const qs = buildQS(filters);
 
-  const { data: revenu }    = useApi(`/api/business/revenu-plan${qs}`,  []);
-  const { data: desabo }    = useApi(`/api/business/desabo-plan${qs}`,  []);
-  const { data: topClients }= useApi(`/api/business/top-clients${qs}`,  []);
-  const { data: paiement }  = useApi(`/api/business/mode-paiement${qs}`,[]);
-  const { data: kpis }      = useApi(`/api/business/kpis${qs}`,         {});
+  const { data: revenu }     = useApi(`/api/business/revenu-plan${qs}`,  []);
+  const { data: desabo }     = useApi(`/api/business/desabo-plan${qs}`,  []);
+  const { data: topClients } = useApi(`/api/business/top-clients${qs}`,  []);
+  const { data: paiement }   = useApi(`/api/business/mode-paiement${qs}`,[]);
+  const { data: kpis }       = useApi(`/api/business/kpis${qs}`,         {});
 
-  const revenueMax = revenu.length ? Math.max(...revenu.map(r => r.revenu)) * 1.15 : 100000;
-  const tauxActif  = kpis.actifs && kpis.total_abonnements
+  const revenueMax   = revenu.length     ? Math.max(...revenu.map(r => r.revenu))     * 1.25 : 100000;
+  const topMax       = topClients.length ? Math.max(...topClients.map(r => r.revenu)) * 1.25 : 50000;
+  const paiementMax  = paiement.length   ? Math.max(...paiement.map(r => r.total))   * 1.3  : 100;
+  const tauxActif = kpis.actifs && kpis.total_abonnements
     ? ((Number(kpis.actifs) / Number(kpis.total_abonnements)) * 100).toFixed(1)
     : null;
 
@@ -73,27 +75,28 @@ export default function Users() {
       <div className="chart-grid">
         <div className="chart-card">
           <div className="chart-card-title">💰 Revenu par Plan</div>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={revenu} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={230}>
+            <BarChart data={revenu} margin={{ top: 24, right: 20, left: 10, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="plan" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
-                domain={[0, revenueMax]} tickFormatter={v => `${(v/1000).toFixed(0)}K`} />
+                domain={[0, revenueMax]} tickFormatter={v => `${(v/1000).toFixed(0)}K`} width={42} />
               <Tooltip formatter={(v) => [`${Number(v).toLocaleString('fr-TN')} TND`, 'Revenu']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
-              <Bar dataKey="revenu" fill="#1e3a8a" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="revenu" fill="#1e3a8a" radius={[4, 4, 0, 0]}
+                label={{ position: 'top', fontSize: 10, fill: '#374151', formatter: v => `${(v/1000).toFixed(0)}K` }} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         <div className="chart-card">
           <div className="chart-card-title">🍩 Désabonnements par Plan</div>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={230}>
             <PieChart>
-              <Pie data={desabo} cx="50%" cy="48%" innerRadius={58} outerRadius={88}
+              <Pie data={desabo} cx="50%" cy="45%" innerRadius={60} outerRadius={90}
                 dataKey="value" paddingAngle={2} label={false} labelLine={false}>
                 {desabo.map((e, i) => <Cell key={i} fill={e.color} stroke="none" />)}
               </Pie>
-              <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+              <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12, paddingTop: 4 }}
                 formatter={(value, entry) => (
                   <span style={{ color: '#374151' }}>
                     {value}&nbsp;
@@ -108,14 +111,14 @@ export default function Users() {
 
       <div className="chart-grid">
         <div className="chart-card">
-          <div className="chart-card-title">🏆 Top 10 Clients par Revenu</div>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={topClients} layout="vertical" margin={{ top: 4, right: 60, left: 0, bottom: 0 }}>
+          <div className="chart-card-title">🏆 Top Clients par Revenu</div>
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={topClients} layout="vertical" margin={{ top: 4, right: 56, left: 8, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" horizontal={false} />
               <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
-                tickFormatter={v => `${(v/1000).toFixed(0)}K`} />
+                domain={[0, topMax]} tickFormatter={v => `${(v/1000).toFixed(0)}K`} />
               <YAxis dataKey="nom" type="category" tick={{ fontSize: 11, fill: '#374151' }}
-                axisLine={false} tickLine={false} width={70} />
+                axisLine={false} tickLine={false} width={80} />
               <Tooltip formatter={(v) => [`${Number(v).toLocaleString('fr-TN')} TND`, 'Revenu']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="revenu" fill="#1e3a8a" radius={[0, 4, 4, 0]}
                 label={{ position: 'right', fontSize: 10, fill: '#374151', formatter: v => `${(v/1000).toFixed(0)}K` }} />
@@ -125,12 +128,13 @@ export default function Users() {
 
         <div className="chart-card">
           <div className="chart-card-title">💳 Abonnements par Mode de Paiement</div>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={paiement} layout="vertical" margin={{ top: 4, right: 40, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={paiement} layout="vertical" margin={{ top: 4, right: 48, left: 8, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+              <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
+                domain={[0, paiementMax]} />
               <YAxis dataKey="mode" type="category" tick={{ fontSize: 11, fill: '#374151' }}
-                axisLine={false} tickLine={false} width={70} />
+                axisLine={false} tickLine={false} width={80} />
               <Tooltip formatter={(v) => [v, 'Abonnements']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="total" fill="#1e3a8a" radius={[0, 4, 4, 0]}
                 label={{ position: 'right', fontSize: 10, fill: '#374151' }} />

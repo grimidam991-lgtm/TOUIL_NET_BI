@@ -27,7 +27,9 @@ export default function Business() {
   const { data: devices } = useApi(`/api/users/sessions-device${qs}`,      []);
   const { data: kpis }    = useApi(`/api/business/kpis${qs}`,              {});
 
-  const mrrMax = mrr.length ? Math.max(...mrr.map(r => r.mrr)) * 1.2 : 2000;
+  const mrrMax    = mrr.length     ? Math.max(...mrr.map(r => r.mrr))     * 1.25 : 2000;
+  const ticketMax = tickets.length ? Math.max(...tickets.map(r => r.nb))  * 1.3  : 100;
+  const deviceMax = devices.length ? Math.max(...devices.map(r => r.nb))  * 1.3  : 300;
 
   return (
     <>
@@ -75,12 +77,13 @@ export default function Business() {
       <div className="chart-grid">
         <div className="chart-card">
           <div className="chart-card-title">📈 Évolution du MRR</div>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={mrr} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={230}>
+            <LineChart data={mrr} margin={{ top: 16, right: 20, left: 10, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="mois" tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false} interval={3} />
-              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} domain={[0, mrrMax]} />
-              <Tooltip formatter={(v) => [`${Number(v).toLocaleString('fr-TN')} TND`, 'MRR Mensuel']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
+              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
+                domain={[0, mrrMax]} tickFormatter={v => `${(v/1000).toFixed(0)}K`} width={38} />
+              <Tooltip formatter={(v) => [`${Number(v).toLocaleString('fr-TN')} TND`, 'MRR']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Line type="monotone" dataKey="mrr" stroke="#1e3a8a" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: '#1e3a8a' }} />
             </LineChart>
           </ResponsiveContainer>
@@ -88,13 +91,13 @@ export default function Business() {
 
         <div className="chart-card">
           <div className="chart-card-title">🍩 Répartition par Plan</div>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={230}>
             <PieChart>
-              <Pie data={plans} cx="50%" cy="48%" innerRadius={58} outerRadius={88}
+              <Pie data={plans} cx="50%" cy="45%" innerRadius={60} outerRadius={90}
                 dataKey="value" paddingAngle={2} label={false} labelLine={false}>
                 {plans.map((e, i) => <Cell key={i} fill={e.color} stroke="none" />)}
               </Pie>
-              <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+              <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12, paddingTop: 4 }}
                 formatter={(value, entry) => (
                   <span style={{ color: '#374151' }}>
                     {value}&nbsp;
@@ -111,11 +114,11 @@ export default function Business() {
       <div className="chart-grid">
         <div className="chart-card">
           <div className="chart-card-title">📊 Tickets par Catégorie</div>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={tickets} layout="vertical" margin={{ top: 4, right: 24, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={tickets} layout="vertical" margin={{ top: 4, right: 48, left: 8, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-              <YAxis dataKey="categorie" type="category" tick={{ fontSize: 11, fill: '#374151' }} axisLine={false} tickLine={false} width={100} />
+              <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} domain={[0, ticketMax]} />
+              <YAxis dataKey="categorie" type="category" tick={{ fontSize: 11, fill: '#374151' }} axisLine={false} tickLine={false} width={110} />
               <Tooltip formatter={(v) => [v, 'Tickets']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="nb" fill="#1e3a8a" radius={[0, 4, 4, 0]}
                 label={{ position: 'right', fontSize: 10, fill: '#374151' }} />
@@ -125,11 +128,11 @@ export default function Business() {
 
         <div className="chart-card">
           <div className="chart-card-title">📱 Sessions par Device</div>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={devices} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={devices} margin={{ top: 24, right: 20, left: 10, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="device" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} domain={[0, deviceMax]} width={38} />
               <Tooltip formatter={(v) => [v, 'Sessions']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
               <Bar dataKey="nb" fill="#1e3a8a" radius={[4, 4, 0, 0]}
                 label={{ position: 'top', fontSize: 10, fill: '#374151' }} />

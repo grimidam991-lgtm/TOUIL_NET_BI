@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 const MOIS_FR = [
   { v: 1,  l: 'Janvier' }, { v: 2,  l: 'Février' },  { v: 3,  l: 'Mars' },
   { v: 4,  l: 'Avril' },   { v: 5,  l: 'Mai' },       { v: 6,  l: 'Juin' },
@@ -5,12 +7,11 @@ const MOIS_FR = [
   { v: 10, l: 'Octobre' }, { v: 11, l: 'Novembre' },  { v: 12, l: 'Décembre' },
 ];
 
-const ANNEES = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
-const PLANS  = ['Premium', 'Standard', 'Entreprise'];
-const CATS   = ['Bug', 'Fonctionnalité', 'Performance', 'Facturation', 'Sécurité', 'Autre'];
-const PRIOS  = ['Critique', 'Haute', 'Moyenne', 'Basse'];
+const PLANS = ['Premium', 'Standard', 'Entreprise'];
+const CATS  = ['Bug', 'Fonctionnalité', 'Performance', 'Facturation', 'Sécurité', 'Autre'];
+const PRIOS = ['Critique', 'Haute', 'Moyenne', 'Basse'];
 
-function Select({ label, value, onChange, options, allLabel }) {
+function Select({ value, onChange, options, allLabel }) {
   const active = value !== '';
   return (
     <div className={`fb-select-wrap ${active ? 'active' : ''}`}>
@@ -28,10 +29,17 @@ function Select({ label, value, onChange, options, allLabel }) {
 }
 
 export default function FilterBar({ filters, onChange, showPlan = false, showCategorie = false, showPriorite = false }) {
+  const [annees, setAnnees] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/meta/annees')
+      .then(r => r.json())
+      .then(data => setAnnees(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
   const activeCount = Object.values(filters).filter(v => v !== '').length;
-
   const set = (key) => (val) => onChange({ ...filters, [key]: val });
-
   const reset = () => onChange({ annee: '', mois: '', plan: '', categorie: '', priorite: '' });
 
   return (
@@ -47,24 +55,24 @@ export default function FilterBar({ filters, onChange, showPlan = false, showCat
       </div>
 
       <div className="filter-bar-selects">
-        <Select label="Année" value={filters.annee} onChange={set('annee')}
-          options={ANNEES.map(a => ({ v: a, l: String(a) }))} allLabel="Toutes les années" />
+        <Select value={filters.annee} onChange={set('annee')}
+          options={annees.map(a => ({ v: a, l: String(a) }))} allLabel="Toutes les années" />
 
-        <Select label="Mois" value={filters.mois} onChange={set('mois')}
+        <Select value={filters.mois} onChange={set('mois')}
           options={MOIS_FR} allLabel="Tous les mois" />
 
         {showPlan && (
-          <Select label="Plan" value={filters.plan} onChange={set('plan')}
+          <Select value={filters.plan} onChange={set('plan')}
             options={PLANS} allLabel="Tous les plans" />
         )}
 
         {showCategorie && (
-          <Select label="Catégorie" value={filters.categorie} onChange={set('categorie')}
+          <Select value={filters.categorie} onChange={set('categorie')}
             options={CATS} allLabel="Toutes les catégories" />
         )}
 
         {showPriorite && (
-          <Select label="Priorité" value={filters.priorite} onChange={set('priorite')}
+          <Select value={filters.priorite} onChange={set('priorite')}
             options={PRIOS} allLabel="Toutes les priorités" />
         )}
       </div>
